@@ -8,11 +8,9 @@ import datetime
 import requests
 from time import gmtime, strftime
 
-<<<<<<< HEAD
+
 from classes import *
-=======
-import classes
->>>>>>> 19b3c6e4c5aa1e7fd9fb82a68be07af68ade4156
+
 
 #nohup python oanda-autotrader.12.py &> trader.log&
 #trader.log will be created and "kill [PID]" to stop oanda process in background.
@@ -477,20 +475,25 @@ def calcPip(high, low, pair):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
   myList = []
   #Date : [lowAsk, highAsk]
   timeSet_eu = { 
                   '11/28/2016': [101.1, 101.3],
                   '11/29/2016': [104.1, 103.3]
                }
-  EurUsd = Currency("EUR_USD", 12, "H4", timeSet_eu, True)
+  EurUsd = Currency("EUR_USD", 5, "H4", timeSet_eu, True)
   myList.append(EurUsd)
   brain = Server(myList)
   myBank = Bank(5000, 2) #Balance, percent Risk
+
+
+  url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(EurUsd.period) + "&instrument=" + EurUsd.pair +"&granularity=" + EurUsd.granularity + "&candleFormat=bidask"
+  header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
+  connect = requests.get(url, headers=header)
+  jsoncandle = connect.json()
+  candles = jsoncandle['candles']
+  print(candles)
   
   print(brain.Currencies[0].timeSet)
   print(EurUsd.timeSet['11/28/2016'])
-=======
->>>>>>> 19b3c6e4c5aa1e7fd9fb82a68be07af68ade4156
   print("This is the main function")
