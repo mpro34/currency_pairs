@@ -8,6 +8,8 @@ import datetime
 import requests
 from time import gmtime, strftime
 
+import classes.py
+
 #nohup python oanda-autotrader.12.py &> trader.log&
 #trader.log will be created and "kill [PID]" to stop oanda process in background.
 
@@ -471,81 +473,4 @@ def calcPip(high, low, pair):
 
 
 if __name__ == "__main__":
- #   if len(sys.argv) != 5:
- #       print "Give me a period (10), candle size (H4), pair (EUR_USD) and account number!"
- #       sys.exit()
- #   else:
- #       period, pair, granularity, account = sys.argv[1:]
-    #    pair, granularity = sys.argv[1:]
-    #    CandleAnalyze(pair, granularity)
- #       compareAndTrade(int(period), pair, granularity, account)
-        #period, pair, granularity = sys.argv[1:]
-        #pastSMA(period, pair, granularity)
-        #TrendCheck(period, pair, granularity)
-
-        #SMA(int(period), pair, granularity)
-        #pair, granularity = sys.argv[1:]
-  pairList = ['EUR_USD', 'AUD_USD', 'GBP_USD', 'USD_CHF']#, 'USD_JPY'] #Currency pairs to cycle through (x5)
-  pairStateList = [False, False, False, False]#, False] #False if no trades are open under this pair.
-        #This mean that it would take around 4 minutes to cycle back to the beginning.
-  granularity = "M5" #5 Minute periods.
-  pair = ""
-  pair_state = False
-  boolRisk = True
-  count = 0
-  equity_at_risk = 0.0
-  #input_balance = input("Please enter current Balance: ")
-  input_balance = 5000
-  #Quit loop if Losses exceed risk amount!!!
-  while(type(boolRisk) is bool):
-    print("*****     " + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + "     *****", file=sys.stderr)
-    print("PAIR_ANALYZED: " + pairList[count], file=sys.stderr)
-          #1111
-    eprint("PAIR_WITH_OPEN_TRADE: " , pairStateList[count])
-    pair, pair_state = tradeLimiter(pairList[count], pairStateList[count])
-    eprint("After tradelimiter: " , pairList[count])
-    eprint("pairstate1: ", pairStateList[count])
-    eprint("Trade-limiter: ", pair)
-    eprint("pairstate2: ", pair_state)
-    pairStateList[count] = pair_state #Update each pairs' state
-    if pairStateList[count] == False:
-      eprint("No open trades under pair: ", pairList[count])
-      equity_at_risk = EntryPoint(pairList[count], granularity, equity_at_risk) #Should return the amount of equity at risk (float).
-      boolRisk = equityAvailable(equity_at_risk) #Will return bool that interprets if you have equity available to trade (boolean).
-    else:
-      eprint("1 open trade under pair: ", pairList[count])
-              
-    count += 1
-         # 	print type(boolRisk), count
-    print("sleeping 30 seconds...", file=sys.stderr)
-    time.sleep(30) #sleep 60 seconds
-    if count == 4:
-      count = 0 
-    #    myhigh, mylow = SupportandResistance(pair, granularity)
-    #    print "TESTER: ", myhigh, mylow
-
-    #checkOpenTrades()
-
-
-
-#Algorithm for SMA.
-x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] #Length 20 [Oldest -> Newest]
-#LENGTH of X has to be pastSMA * 2
-#7 is changing most current candle, but I don't get 7 returned form the requests query.
-pastSMA = 10 #Amount of past SMA's to get
-count = 0
-smaList = []
-tempSum = 0
-#Calculate pastSMA(5) -> list of SMA like [SMA0, SMA1, SMA2, SMA3, SMA4, SMA5]
-x.reverse() #[Newest -> Oldest]
-for j in range(0, pastSMA): #0 -> 4
-    for i in range(j, pastSMA+j): #5 is the amount of pastSMA to obtain.  print i
-      tempSum += x[i]
-    #print "i :", i
-      #print tempSum
-    tempSum = tempSum/pastSMA
-    smaList.append(tempSum)
-    tempSum = 0
-    #print smaList
-smaList.reverse() #Changes smaList to display [Oldest -> Newest]
-#print smaList
+  eprint("This is the main function")
