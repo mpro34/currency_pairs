@@ -8,7 +8,7 @@ import datetime
 import requests
 from time import gmtime, strftime
 
-import classes.py
+import classes
 
 #nohup python oanda-autotrader.12.py &> trader.log&
 #trader.log will be created and "kill [PID]" to stop oanda process in background.
@@ -473,4 +473,4 @@ def calcPip(high, low, pair):
 
 
 if __name__ == "__main__":
-  eprint("This is the main function")
+  print("This is the main function")
