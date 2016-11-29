@@ -8,7 +8,7 @@ import datetime
 import requests
 from time import gmtime, strftime
 
-import classes.py
+from classes import *
 
 #nohup python oanda-autotrader.12.py &> trader.log&
 #trader.log will be created and "kill [PID]" to stop oanda process in background.
@@ -473,4 +473,17 @@ def calcPip(high, low, pair):
 
 
 if __name__ == "__main__":
-  eprint("This is the main function")
+  myList = []
+  #Date : [lowAsk, highAsk]
+  timeSet_eu = { 
+                  '11/28/2016': [101.1, 101.3],
+                  '11/29/2016': [104.1, 103.3]
+               }
+  EurUsd = Currency("EUR_USD", 12, "H4", timeSet_eu, True)
+  myList.append(EurUsd)
+  brain = Server(myList)
+  myBank = Bank(5000, 2) #Balance, percent Risk
+  
+  print(brain.Currencies[0].timeSet)
+  print(EurUsd.timeSet['11/28/2016'])
+  print("This is the main function")
