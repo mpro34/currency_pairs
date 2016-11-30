@@ -53,14 +53,14 @@ def getGranularitySeconds(granularity):
     elif granularity[0] == 'M':
         return 60*60*24*30
 
-def pastSMA(period, pair, granularity):  
+def pastSMA(period, pair, granularity):
     distance_in_history = 10 #Number of periods to check back for the SMA values. ADJUST THIS VALUE!!
     candleList = []
     #for i in range(0,distance_in_history):
     url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(int(period)+distance_in_history) + "&instrument=" + pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
     header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
     connect = requests.get(url, headers=header)
-    jsoncandle = connect.json()  
+    jsoncandle = connect.json()
     candles = jsoncandle['candles']
     #for i in range(len(candles)):
     	#print "CNADLES: ", candles[i]['time']
@@ -194,7 +194,7 @@ def tradeLimiter(pair, pair_state):
       #  print "three boom"
     return pair, pair_state
 
-  
+
 
 #Returns true if the amount of currency put at risk ("risk_amount") is <= 1% of equity.
 def equityAvailable(risk_amount):
@@ -324,18 +324,18 @@ def EntryPoint(pair, granularity, equity_at_risk):
         print("buy", file=sys.stderr)
         url = "https://api-fxpractice.oanda.com/v1/accounts/7079063/orders"
         header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-        data = ({"instrument": pair, 
+        data = ({"instrument": pair,
           "units": 10000,
           "side": "buy",
           "takeProfit": round(myhigh*1.001, 4),
           "stopLoss": mylow,
           "type": "market"})
-     
+
 #      print "buying"
         print(data, " + ", url, file=sys.stderr)
         connect = requests.post(url, data=data, headers=header)
         print(connect.text, file=sys.stderr)
-        equity_at_risk += distance_to_support #increment the equity at risk based on the amount of stoploss. 
+        equity_at_risk += distance_to_support #increment the equity at risk based on the amount of stoploss.
         print(equity_at_risk)
         return equity_at_risk
 
@@ -343,19 +343,19 @@ def EntryPoint(pair, granularity, equity_at_risk):
         print("sell", file=sys.stderr)
         url = "https://api-fxpractice.oanda.com/v1/accounts/7079063/orders"
         header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-        data = ({"instrument": pair, 
+        data = ({"instrument": pair,
           "units": 10000,
           "side": "sell",
           "takeProfit": round(mylow/1.001, 4),
           "stopLoss": myhigh,
           "type": "market"})
-      
+
  #      print "selling"
         print(data, " + ", url, file=sys.stderr)
         connect = requests.post(url, data=data, headers=header)
         print(connect.text, file=sys.stderr)
-        equity_at_risk += distance_to_resistance #increment the equity at risk based on the amount of stoploss.    
-        print(equity_at_risk) 
+        equity_at_risk += distance_to_resistance #increment the equity at risk based on the amount of stoploss.
+        print(equity_at_risk)
         return equity_at_risk
 
       else:
@@ -367,18 +367,18 @@ def EntryPoint(pair, granularity, equity_at_risk):
         print("buy", file=sys.stderr)
         url = "https://api-fxpractice.oanda.com/v1/accounts/7079063/orders"
         header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-        data = ({"instrument": pair, 
+        data = ({"instrument": pair,
           "units": 10000,
           "side": "buy",
           "takeProfit": round(myhigh*1.001, 4),
           "stopLoss": mylow,
           "type": "market"})
-     
+
 #      print "buying"
         print(data, " + ", url, file=sys.stderr)
         connect = requests.post(url, data=data, headers=header)
         print(connect.text, file=sys.stderr)
-        equity_at_risk += distance_to_support #increment the equity at risk based on the amount of stoploss. 
+        equity_at_risk += distance_to_support #increment the equity at risk based on the amount of stoploss.
         print(equity_at_risk)
         return equity_at_risk
 
@@ -386,19 +386,19 @@ def EntryPoint(pair, granularity, equity_at_risk):
         print("sell", file=sys.stderr)
         url = "https://api-fxpractice.oanda.com/v1/accounts/7079063/orders"
         header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-        data = ({"instrument": pair, 
+        data = ({"instrument": pair,
           "units": 10000,
           "side": "sell",
           "takeProfit": round(mylow/1.001, 4),
           "stopLoss": myhigh,
           "type": "market"})
-      
+
  #      print "selling"
         print(data, " + ", url, file=sys.stderr)
         connect = requests.post(url, data=data, headers=header)
         print(connect.text, file=sys.stderr)
-        equity_at_risk += distance_to_resistance #increment the equity at risk based on the amount of stoploss.    
-        print(equity_at_risk) 
+        equity_at_risk += distance_to_resistance #increment the equity at risk based on the amount of stoploss.
+        print(equity_at_risk)
         return equity_at_risk
 
       else:
@@ -429,8 +429,8 @@ def SupportandResistance(pair, granularity):
      #       print "changedHHHH: ", lastHigh, candles[count-1]['highAsk']
         if candles[count]['lowAsk'] <= float(lastLow):
             lastLow = candles[count]['lowAsk']
-     #       print "changedLLLL: ", lastLow, candles[count-1]['lowAsk']    
-    #Compare the highest high and lowest low obtain above with the data, again, this time accept candles within (high-low/5 pips above or below). Future: This will be used to better 
+     #       print "changedLLLL: ", lastLow, candles[count-1]['lowAsk']
+    #Compare the highest high and lowest low obtain above with the data, again, this time accept candles within (high-low/5 pips above or below). Future: This will be used to better
     # speculate signals based on the amount of times the support/resistance level has been hit (given by the length of highList and lowList below).
     for candle in candles:
         candleBuffer = ((lastHigh - lastLow)) * 0.0001 #Careful if trading USD/JPY here.
@@ -477,23 +477,16 @@ def calcPip(high, low, pair):
 if __name__ == "__main__":
   myList = []
   #Date : [lowAsk, highAsk]
-  timeSet_eu = { 
-                  '11/28/2016': [101.1, 101.3],
-                  '11/29/2016': [104.1, 103.3]
-               }
-  EurUsd = Currency("EUR_USD", 5, "H4", timeSet_eu, True)
+  #timeSet_eu = {}#{
+                  #'11/28/2016': [101.1, 101.3],
+                 # '11/29/2016': [104.1, 103.3]
+               #}
+  EurUsd = Currency("EUR_USD", 5, "M1")
   myList.append(EurUsd)
   brain = Server(myList)
   myBank = Bank(5000, 2) #Balance, percent Risk
+  EurUsd.fillTimeSet(EurUsd.period, EurUsd.granularity)
 
-
-  url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(EurUsd.period) + "&instrument=" + EurUsd.pair +"&granularity=" + EurUsd.granularity + "&candleFormat=bidask"
-  header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-  connect = requests.get(url, headers=header)
-  jsoncandle = connect.json()
-  candles = jsoncandle['candles']
-  print(candles)
-  
-  print(brain.Currencies[0].timeSet)
-  print(EurUsd.timeSet['11/28/2016'])
-  print("This is the main function")
+  #print(brain.Currencies[0].timeSet)
+  #print(EurUsd.timeSet['11/28/2016'])
+  #print("This is the main function")

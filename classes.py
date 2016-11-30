@@ -6,6 +6,7 @@ import sys
 import time
 import datetime
 import requests
+import collections
 from time import gmtime, strftime
 
 #nohup python oanda-autotrader.12.py &> trader.log&
@@ -22,7 +23,7 @@ class Server:
   def checkRisk(self):
     print("Function that will check the Bank Object for the risk amount and if too much has been lost.")
 
-  def makeTrade(self, pair): 
+  def makeTrade(self, pair):
     print("Will get the index of the pair in the Currencies list and perform a trade.")
 
   def processResults(self, Currencies):
@@ -48,9 +49,9 @@ class Bank:
 
 
 class Currency:
-  'Will be a self-contained currency pair object'
+  'Will be a self-contained currency pair object - Starts as Uptrend true and an empty timeSet dictionary'
   'No Global Variables'
-  def __init__(self, pair, period, granularity, timeSet, uptrend):
+  def __init__(self, pair, period, granularity, uptrend=True, timeSet={}):
     #pair is a string, period and granularity are ints, '
     #timeSet is a Dictionary mapping the date as key, and highAsk, lowAsk as values.'
     #uptrend is a booleanm, where true = uptrend, false = downtrend
@@ -74,6 +75,20 @@ class Currency:
 
   def setGranularity(self, granularity):
     self.granularity = granularity
+
+#Will populate the timeSet dictionary parameter with data from the past 'period' days.
+  def fillTimeSet(self, period, granularity):
+        url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(period) + "&instrument=" + self.pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
+        header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer ffc65942bd830f2cf8867a57a8e548e3-c269c756a553957fc32c985e7f0e02d6", "Accept-Encoding": "gzip, deflate"}
+        connect = requests.get(url, headers=header)
+        jsoncandle = connect.json()
+        #print(jsoncandle)
+        candles = jsoncandle['candles']
+        #Fills out the TimeSet dictionary with the closeAsk, highAsk and lowAsk prices as a list of values associated with the date as the key.
+        for i in range(0, period):
+            self.timeSet[candles[i]['time']] = [ candles[i]['closeAsk'], candles[i]['highAsk'], candles[i]['lowAsk'] ]
+        print(self.timeSet.keys())
+
 
   ## Calculates the SMA over 'period' candles of size 'granularity' for pair 'pair'
   def SMA(period, pair, granularity):
@@ -118,8 +133,8 @@ def SupportandResistance(pair, granularity):
      #       print("changedHHHH: ", lastHigh, candles[count-1]['highAsk']
         if candles[count]['lowAsk'] <= float(lastLow):
             lastLow = candles[count]['lowAsk']
-     #       print("changedLLLL: ", lastLow, candles[count-1]['lowAsk']    
-    #Compare the highest high and lowest low obtain above with the data, again, this time accept candles within (high-low/5 pips above or below). Future: This will be used to better 
+     #       print("changedLLLL: ", lastLow, candles[count-1]['lowAsk']
+    #Compare the highest high and lowest low obtain above with the data, again, this time accept candles within (high-low/5 pips above or below). Future: This will be used to better
     # speculate signals based on the amount of times the support/resistance level has been hit (given by the length of highList and lowList below).
     for candle in candles:
         candleBuffer = ((lastHigh - lastLow)) * 0.0001 #Careful if trading USD/JPY here.
