@@ -475,17 +475,26 @@ def calcPip(high, low, pair):
 
 
 if __name__ == "__main__":
+
+  #TREND SIGNALS
+  # If uptrend or downtrend from 200past SMA.
+  # BUY if UP && 12 goes above 24 SMA.
+  # SELL if DOWN && 12 goes below 24 SMA.
   myList = []
   #Date : [lowAsk, highAsk]
   #timeSet_eu = {}#{
                   #'11/28/2016': [101.1, 101.3],
                  # '11/29/2016': [104.1, 103.3]
                #}
-  EurUsd = Currency("EUR_USD", 5, "M1")
+  EurUsd = Currency("USD_JPY", 200, "M1")
   myList.append(EurUsd)
   brain = Server(myList)
   myBank = Bank(5000, 2) #Balance, percent Risk
-  EurUsd.fillTimeSet(EurUsd.period, EurUsd.granularity)
+  #EurUsd.fillTimeSet(EurUsd.period, EurUsd.granularity)
+  pastSMA_20 = EurUsd.pastSMA(500, EurUsd.granularity)
+  currSMA_20 = EurUsd.SMA(EurUsd.period, EurUsd.granularity)
+  print(pastSMA_20)
+  print(currSMA_20)
 
   #print(brain.Currencies[0].timeSet)
   #print(EurUsd.timeSet['11/28/2016'])

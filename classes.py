@@ -91,13 +91,13 @@ class Currency:
 
 
   ## Calculates the SMA over 'period' candles of size 'granularity' for pair 'pair'
-  def SMA(period, pair, granularity):
+  def SMA(self, period, granularity):
    # conn = httplib.HTTPSConnection("api-fxpractice.oanda.com")
    # url = ''.join(["/v1/candles?count=", str(period + 1), "&instrument=", pair, "&granularity=", str(granularity), "&candleFormat=bidask"])
    # print url
    # conn.request("GET", url)
    # response = conn.getresponse().read()
-    url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(period) + "&instrument=" + pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
+    url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(period) + "&instrument=" + self.pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
     header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
     connect = requests.get(url, headers=header)
  #   print("hello" + connect.text
@@ -113,6 +113,47 @@ class Currency:
     smaDivisor = round(smaSum / period, 4)
     return smaDivisor
 
+  def pastSMA(self, period, granularity):
+    distance_in_history = period #10 Number of periods to check back for the SMA values. ADJUST THIS VALUE!!
+    candleList = []
+    #for i in range(0,distance_in_history):
+    url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(int(period)+distance_in_history) + "&instrument=" + self.pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
+    header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer ffc65942bd830f2cf8867a57a8e548e3-c269c756a553957fc32c985e7f0e02d6", "Accept-Encoding": "gzip, deflate"}
+    connect = requests.get(url, headers=header)
+    jsoncandle = connect.json()
+    candles = jsoncandle['candles']
+    #for i in range(len(candles)):
+      #print "CNADLES: ", candles[i]['time']
+    #print candles[0]['closeAsk'], "*&********&"  #List of period+i candle objects
+    #del candles[:-i] #Removes first i candles from each candle list
+      #Used to 'fix' the candles so that each list is the same length as the period.
+    #candleList.append(candles)
+   #   print len(candles), "i", i
+   # print candleList
+    smaList = []
+    #print candles[0]['time']
+    candles.reverse()
+    #print candles[0]['time']
+    #smaSum = 0.0
+    for j in range(0, distance_in_history):
+      smaSum = 0.0
+ #    print j
+      for i in range(j, period+j):
+        smaSum += candles[i]['closeAsk']
+#     print smaSum, "*&********&"
+      smaSum = round(smaSum / int(period), 4)
+    #  print "json Candle length: ", len(jsoncandle)
+      #for candle in range(0,len(jsoncandle)):#-count):
+        #smaSum += jsoncandle[candle]['closeAsk']
+        #smaDivisor = round(smaSum / int(period), 4)
+      smaList.append(smaSum)
+    smaList.reverse()
+    #print smaList
+    #  print count
+    #  print len(jsoncandle)
+     # print jsoncandle[candle]['time'], "DIVISOR", smaDivisor
+   # print "LIST: ", smaList
+    return smaList
 
 #For now, this function will be used to determine the stop and limit amounts for EntryPoint() above. Future: Only buy/sell if the resiustance/support values are hit 2-3 times in the last period.
 def SupportandResistance(pair, granularity):
