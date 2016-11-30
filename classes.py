@@ -118,7 +118,7 @@ class Currency:
     candleList = []
     #for i in range(0,distance_in_history):
     url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(int(period)+distance_in_history) + "&instrument=" + self.pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
-    header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer ffc65942bd830f2cf8867a57a8e548e3-c269c756a553957fc32c985e7f0e02d6", "Accept-Encoding": "gzip, deflate"}
+    header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
     connect = requests.get(url, headers=header)
     jsoncandle = connect.json()
     candles = jsoncandle['candles']
