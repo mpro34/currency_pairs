@@ -166,6 +166,7 @@ class Currency:
         elif (pastSMA_12[i+1] < pastSMA_12[i]):
           self.trend -= 1   #The next value is less than the previous.
     return self.trend
+
 #*****NEED TO REFINE the tolerance of the SMA12 and 24.
 #Determine when 12SMA and 24SMA cross.
   def findPipCross(self):
@@ -182,6 +183,14 @@ class Currency:
     else:
       return
 
+#****After trend is calculated, pip cross is found, need to determine buy size.
+  def determineTradeSize(self):
+
+
+#****After Trade size is known, need to make trade and update Bank object.
+  def placeTrade(self):
+
+    
 #For now, this function will be used to determine the stop and limit amounts for EntryPoint() above. Future: Only buy/sell if the resiustance/support values are hit 2-3 times in the last period.
 def SupportandResistance(pair, granularity):
     searchBuffer = 15
