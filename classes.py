@@ -185,19 +185,90 @@ class Currency:
 
 #****After trend is calculated, pip cross is found, need to determine buy size.
   def determineTradeSize(self):
+    myhigh, mylow = SupportandResistance(self.pair, self.granularity)
+
+#Small widget to get the amount of pips to resistance and support from the current price.
+#****Initiate PipConvert****
+    url = "https://api-fxpractice.oanda.com/v1/prices?instruments=" + self.pair
+    header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
+    connect2 = requests.get(url, headers=header)
+    jsoncandle = connect2.json()
+    currentCandle = jsoncandle['prices']
+    if pair == "USD_JPY":
+      distance_to_resistance = (myhigh - currentCandle[0]['ask']) / 0.01
+      distance_to_support = (currentCandle[0]['ask'] - mylow) / 0.01
+    else:
+      distance_to_resistance = (myhigh - currentCandle[0]['ask']) / 0.0001
+      distance_to_support = (currentCandle[0]['ask'] - mylow) / 0.0001
+    eprint("CurrentPRICE: ", currentCandle[0]['ask'])
+
+#****After Trade size is known, need to make trade and update Bank object. - decision = "buy" or "sell"
+#NEEDS support and resistance values (lasthigh, lastlow)
+  def placeTrade(self, decision):
+      if trendFinal == 'buy':
+        print("buy", file=sys.stderr)
+        url = "https://api-fxpractice.oanda.com/v1/accounts/7079063/orders"
+        header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
+        data = ({"instrument": self.pair,
+          "units": 10000,
+          "side": "buy",
+          "takeProfit": round(myhigh*1.001, 4),
+          "stopLoss": mylow,
+          "type": "market"})
+
+#      print "buying"
+        print(data, " + ", url, file=sys.stderr)
+        connect = requests.post(url, data=data, headers=header)
+        print(connect.text, file=sys.stderr)
+        equity_at_risk += distance_to_support #increment the equity at risk based on the amount of stoploss.
+        print(equity_at_risk)
+        return equity_at_risk
+
+      elif trendFinal == 'sell':
+        print("sell", file=sys.stderr)
+        url = "https://api-fxpractice.oanda.com/v1/accounts/7079063/orders"
+        header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
+        data = ({"instrument": self.pair,
+          "units": 10000,
+          "side": "sell",
+          "takeProfit": round(mylow/1.001, 4),
+          "stopLoss": myhigh,
+          "type": "market"})
+
+ #      print "selling"
+        print(data, " + ", url, file=sys.stderr)
+        connect = requests.post(url, data=data, headers=header)
+        print(connect.text, file=sys.stderr)
+        equity_at_risk += distance_to_resistance #increment the equity at risk based on the amount of stoploss.
+        print(equity_at_risk)
+        return equity_at_risk
 
 
-#****After Trade size is known, need to make trade and update Bank object.
-  def placeTrade(self):
 
-    
-#For now, this function will be used to determine the stop and limit amounts for EntryPoint() above. Future: Only buy/sell if the resiustance/support values are hit 2-3 times in the last period.
-def SupportandResistance(pair, granularity):
+#Checks all open positions and return the amount of equity at risk, in other words, the stopLoss amount total over all open orders.
+  def checkOpenTrades():
+    url = "https://api-fxpractice.oanda.com/v1/accounts/7079063/trades"
+    header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
+    connect = requests.get(url, headers=header)
+    jsondata = connect.json()
+    stopLossinUse = 0.0;
+    for i in range(0,len(jsondata['trades'])):
+      usedPair = jsondata['trades'][i]['instrument']
+      if usedPair == "USD_JPY" or usedPair == "AUD_JPY":
+        stopLossinUse += abs(jsondata['trades'][i]['stopLoss']-jsondata['trades'][i]['price']) / 0.01
+      else:
+        stopLossinUse += abs(jsondata['trades'][i]['stopLoss']-jsondata['trades'][i]['price']) / 0.0001
+    eprint("stoploss_inuse:", stopLossinUse)
+    return stopLossinUse
+
+
+    #For now, this function will be used to determine the stop and limit amounts for EntryPoint() above. Future: Only buy/sell if the resiustance/support values are hit 2-3 times in the last period.
+  def SupportandResistance(pair, granularity):
     searchBuffer = 15
     count = 0
     url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(searchBuffer) + "&instrument=" + pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
     header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-    connect = requests.get(url, headers=header, verify=False)
+    connect = requests.get(url, headers=header)
     jsoncandle = connect.json()
     candles = jsoncandle['candles']
     lastHigh = candles[count]['highAsk']
@@ -207,18 +278,18 @@ def SupportandResistance(pair, granularity):
         count = count + 1
         if float(candles[count]['highAsk']) >= float(lastHigh):
             lastHigh = candles[count]['highAsk']
-     #       print("changedHHHH: ", lastHigh, candles[count-1]['highAsk']
+     #       print "changedHHHH: ", lastHigh, candles[count-1]['highAsk']
         if candles[count]['lowAsk'] <= float(lastLow):
             lastLow = candles[count]['lowAsk']
-     #       print("changedLLLL: ", lastLow, candles[count-1]['lowAsk']
+     #       print "changedLLLL: ", lastLow, candles[count-1]['lowAsk']
     #Compare the highest high and lowest low obtain above with the data, again, this time accept candles within (high-low/5 pips above or below). Future: This will be used to better
     # speculate signals based on the amount of times the support/resistance level has been hit (given by the length of highList and lowList below).
     for candle in candles:
         candleBuffer = ((lastHigh - lastLow)) * 0.0001 #Careful if trading USD/JPY here.
         highList = [lastHigh]
         lowList = [lastLow]
-      #  print("high: ", candle['highAsk']
-      #  print("low: ", candle['lowAsk']
+      #  print "high: ", candle['highAsk']
+      #  print "low: ", candle['lowAsk']
         if (lastHigh - int(candle['highAsk'])) / 0.0001 >= candleBuffer:
             highList = highList + [candle['highAsk']]
         if (int(candle['lowAsk']) - lastLow) / 0.0001 <= candleBuffer:
@@ -226,9 +297,10 @@ def SupportandResistance(pair, granularity):
 
     eprint("lastHigh:", lastHigh)
     eprint("lastLow:", lastLow)
-   # print("highList:", highList
-   # print("lowList:", lowList
+   # print "highList:", highList
+   # print "lowList:", lowList
 
     return (lastHigh,lastLow)
+
 
 
