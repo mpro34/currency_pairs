@@ -474,6 +474,7 @@ def calcPip(high, low, pair):
 
 
 
+
 if __name__ == "__main__":
 
   #TREND SIGNALS
@@ -486,15 +487,23 @@ if __name__ == "__main__":
                   #'11/28/2016': [101.1, 101.3],
                  # '11/29/2016': [104.1, 103.3]
                #}
-  EurUsd = Currency("USD_JPY", 200, "M1")
+  EurUsd = Currency("EUR_USD", 5, "M5")
+  print(EurUsd.calcTrend())  #Determiunes the 200SMA trend
+  print(EurUsd.findPipCross())
   myList.append(EurUsd)
   brain = Server(myList)
   myBank = Bank(5000, 2) #Balance, percent Risk
   #EurUsd.fillTimeSet(EurUsd.period, EurUsd.granularity)
-  pastSMA_20 = EurUsd.pastSMA(500, EurUsd.granularity)
-  currSMA_20 = EurUsd.SMA(EurUsd.period, EurUsd.granularity)
-  print(pastSMA_20)
-  print(currSMA_20)
+  pastSMA_12 = EurUsd.pastSMA(200 , EurUsd.granularity)
+  currSMA_12 = EurUsd.SMA(200, EurUsd.granularity)
+
+  pastSMA_24 = EurUsd.pastSMA(24 , EurUsd.granularity)
+  currSMA_24 = EurUsd.SMA(24, EurUsd.granularity)
+
+  pastSMA_200 = EurUsd.pastSMA(200 , EurUsd.granularity)
+  currSMA_200 = EurUsd.SMA(200, EurUsd.granularity)
+  #print(pastSMA_20)
+  #print(currSMA_20)
 
   #print(brain.Currencies[0].timeSet)
   #print(EurUsd.timeSet['11/28/2016'])

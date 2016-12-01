@@ -51,7 +51,7 @@ class Bank:
 class Currency:
   'Will be a self-contained currency pair object - Starts as Uptrend true and an empty timeSet dictionary'
   'No Global Variables'
-  def __init__(self, pair, period, granularity, uptrend=True, timeSet={}):
+  def __init__(self, pair, period, granularity, trend=5, timeSet={}):
     #pair is a string, period and granularity are ints, '
     #timeSet is a Dictionary mapping the date as key, and highAsk, lowAsk as values.'
     #uptrend is a booleanm, where true = uptrend, false = downtrend
@@ -59,13 +59,13 @@ class Currency:
     self.period = period
     self.granularity = granularity
     self.timeSet = timeSet
-    self.uptrend = uptrend
+    self.trend = trend
 
   def setTimeSet(self, timeSet):
     self.timeSet = timeSet
 
   def setTrend(self, uptrend):
-    self.uptrend = uptrend
+    self.trend = trend
 
   def setPair(self, pair):
     self.pair = pair
@@ -80,7 +80,7 @@ class Currency:
   def fillTimeSet(self, period, granularity):
         url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(period) + "&instrument=" + self.pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
         header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer ffc65942bd830f2cf8867a57a8e548e3-c269c756a553957fc32c985e7f0e02d6", "Accept-Encoding": "gzip, deflate"}
-        connect = requests.get(url, headers=header)
+        connect = requests.get(url, headers=header, verify=False)
         jsoncandle = connect.json()
         #print(jsoncandle)
         candles = jsoncandle['candles']
@@ -99,7 +99,7 @@ class Currency:
    # response = conn.getresponse().read()
     url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(period) + "&instrument=" + self.pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
     header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-    connect = requests.get(url, headers=header)
+    connect = requests.get(url, headers=header, verify=False)
  #   print("hello" + connect.text
  #   print connect.json
     jsoncandle = connect.json()
@@ -119,7 +119,7 @@ class Currency:
     #for i in range(0,distance_in_history):
     url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(int(period)+distance_in_history) + "&instrument=" + self.pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
     header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-    connect = requests.get(url, headers=header)
+    connect = requests.get(url, headers=header, verify=False)
     jsoncandle = connect.json()
     candles = jsoncandle['candles']
     #for i in range(len(candles)):
@@ -155,13 +155,40 @@ class Currency:
    # print "LIST: ", smaList
     return smaList
 
+#Determines the trend via the 200 SMA. 5 = neutral, 0 = downtrend, 10 = uptrend
+#trend > 7 = UpTrend; trend < 3 = DownTrend
+  def calcTrend(self):
+    pastSMA_12 = self.pastSMA(200, self.granularity)
+    for i in range(0, len(pastSMA_12)-1):
+      if (self.trend < 10 and self.trend > 0):
+        if (pastSMA_12[i+1] > pastSMA_12[i]):
+          self.trend += 1   #The next value is greater than the previous.
+        elif (pastSMA_12[i+1] < pastSMA_12[i]):
+          self.trend -= 1   #The next value is less than the previous.
+    return self.trend
+#*****NEED TO REFINE the tolerance of the SMA12 and 24.
+#Determine when 12SMA and 24SMA cross.
+  def findPipCross(self):
+    SMA12 = self.SMA(12, self.granularity)
+    SMA24 = self.SMA(24, self.granularity)
+    if (self.trend > 5 and SMA24 >= (0.9*SMA12) and SMA24 <= (1.1*SMA12)):
+      #This signifies a BUY Signal.
+      print("Buy Now")
+      return True
+    elif (self.trend < 5 and SMA24 >= (0.9*SMA12) and SMA24 <= (1.1*SMA12)):
+      #This signifies a SELL Signal.
+      print("Sell Now")
+      return False
+    else:
+      return
+
 #For now, this function will be used to determine the stop and limit amounts for EntryPoint() above. Future: Only buy/sell if the resiustance/support values are hit 2-3 times in the last period.
 def SupportandResistance(pair, granularity):
     searchBuffer = 15
     count = 0
     url = "https://api-fxpractice.oanda.com/v1/candles?count=" + str(searchBuffer) + "&instrument=" + pair +"&granularity=" + str(granularity) + "&candleFormat=bidask"
     header = {"Content-Type" : "application/x-www-form-urlencoded", "Authorization" : "Bearer key", "Accept-Encoding": "gzip, deflate"}
-    connect = requests.get(url, headers=header)
+    connect = requests.get(url, headers=header, verify=False)
     jsoncandle = connect.json()
     candles = jsoncandle['candles']
     lastHigh = candles[count]['highAsk']
@@ -194,3 +221,5 @@ def SupportandResistance(pair, granularity):
    # print("lowList:", lowList
 
     return (lastHigh,lastLow)
+
+
