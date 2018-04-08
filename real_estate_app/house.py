@@ -1,0 +1,2 @@
+class House(Property):
+    pass
