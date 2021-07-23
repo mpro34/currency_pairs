@@ -13,6 +13,8 @@ from classes import *
 
 # m1 change
 
+# f1 change
+
 #nohup python oanda-autotrader.12.py &> trader.log&
 #trader.log will be created and "kill [PID]" to stop oanda process in background.
 
