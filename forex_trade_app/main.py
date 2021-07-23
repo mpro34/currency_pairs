@@ -26,11 +26,15 @@ def eprint(args, kwargs):
 #2 Need to clean up Entry point and add logic for USD_JPY currency pair.
 
 
+
 ## Master change to also add checking for other instruments.
 
 
 
 #Add Bond trading as well!
+
+
+
 
 
 
