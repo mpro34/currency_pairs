@@ -24,7 +24,12 @@ def eprint(args, kwargs):
 #1 Added tradeLimiter function to ensure only 1 open trade at a time for each currency pair
 #2 Need to clean up Entry point and add logic for USD_JPY currency pair.
 
+
 ## Master change to also add checking for other instruments.
+
+
+
+#Add Bond trading as well!
 
 
 
